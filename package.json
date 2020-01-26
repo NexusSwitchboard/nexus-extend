@@ -16,13 +16,12 @@
   "license": "ISC",
   "dependencies": {
     "assert": "^2.0.0",
+    "dotenv": "^8.2.0",
     "debug": "^4.1.1",
     "cron": "^1.8.1",
     "cron-validator": "^1.1.0",
     "handlebars": "^4.7.2",
-    "uuidv1": "^1.6.14"
-  },
-  "devDependencies": {
+    "uuidv1": "^1.6.14",
     "@types/cron": "^1.7.1",
     "@types/debug": "^4.1.5",
     "@types/dotenv": "^6.1.1",
@@ -30,7 +29,9 @@
     "@types/handlebars": "^4.1.0",
     "@types/lodash": "^4.14.149",
     "@types/node": "^12.7.5",
-    "@types/uuid": "^3.4.6",
+    "@types/uuid": "^3.4.6"
+  },
+  "devDependencies": {
     "typescript": "^3.7.5",
     "tslint": "^6.0.0"
   }
