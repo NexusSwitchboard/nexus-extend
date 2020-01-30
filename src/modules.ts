@@ -1,6 +1,7 @@
 import {NextFunction, Request, Response, Router} from "express";
 import {Connection, ConnectionMap, ConnectionRequestDefinition} from "./connections";
 import {Job, NexusJobDefinition} from "./jobs";
+import {NextHandleFunction} from "connect";
 
 export type NexusModuleConfig = Record<string, any>;
 
@@ -49,6 +50,7 @@ export interface IRouteDefinition {
     path: string;
     handler: (req: Request, resp: Response, next?: NextFunction) => any;
     protected: boolean;
+    bodyParser?: NextHandleFunction;
 }
 
 export type NexusModuleDefinition = {
