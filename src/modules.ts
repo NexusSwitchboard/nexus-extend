@@ -1,9 +1,7 @@
-import {NextFunction, Request, Response, Router} from "express";
-import {Connection, ConnectionMap, ConnectionRequestDefinition} from "./connections";
-import {Job, NexusJobDefinition} from "./jobs";
-import {NextHandleFunction} from "connect";
-
-export type NexusModuleConfig = Record<string, any>;
+import { Application, NextFunction, Request, Response } from "express";
+import { Connection, ConnectionMap, ConnectionRequest } from "./connections";
+import { Job, NexusJobDefinition } from "./jobs";
+import { NextHandleFunction } from "connect";
 
 /**
  * Modules
@@ -38,25 +36,45 @@ export type NexusModuleConfig = Record<string, any>;
  *      that point to a single Nexus instance to manage responses).
  */
 
+/**
+ * This is the configuration for a module as specified by the application
+ * client that is integrating with Nexus.
+ */
+export type ModuleConfig = { [index: string]: any };
+
+/**
+ * This is the shape of the module definition in the top level .nexus file
+ * (for a single module).
+ */
+export interface INexusModuleDefinition {
+    path?: string,
+    scope?: string,
+    jobs?: NexusJobDefinition[],
+    config?: ModuleConfig,
+}
+
+/**
+ * The active module holds state information for an instantiated and initialized
+ * nexus module.  Note that it contains the job _instances_ and the connection
+ * _instances_, not just the definitions of each.
+ */
 export interface INexusActiveModule {
-    config: NexusModuleConfig;
-    router?: Router;
+    config: INexusModuleDefinition;
+    subApp?: Application;
     jobs?: Job[];
     connections?: ConnectionMap;
 }
 
+/**
+ * The route definitions are used by modules to tell Nexus what routes
+ * should be setup automatically during initialization.
+ */
 export interface IRouteDefinition {
     method: "get" | "post" | "put";
     path: string;
     handler: (req: Request, resp: Response, next?: NextFunction) => any;
     protected: boolean;
     bodyParser?: NextHandleFunction;
-}
-
-export type NexusModuleDefinition = {
-    path?: string,
-    jobs?: NexusJobDefinition[],
-    config?: NexusModuleConfig,
 }
 
 /**
@@ -94,16 +112,23 @@ export abstract class NexusModule {
         return undefined;
     }
 
-    public getActiveConfig(): NexusModuleConfig {
+    public getActiveModuleConfig(): ModuleConfig {
         return this.activeModule.config;
     }
 
+    /**
+     * Retrieves a list of Jobs that have been instantiated during initiatlization based on the jobs
+     * listed in the configuration.
+     */
     public getActiveJobs(): Job[] {
         return this.activeModule.jobs;
     }
 
-    public getActiveRoutes(): Router {
-        return this.activeModule.router;
+    /**
+     * Retrieves the Express sub app associated with this module.
+     */
+    public getActiveSubApp(): Application {
+        return this.activeModule.subApp;
     }
 
     // allows the module to receive .nexus module config and return the results.  Note that
@@ -111,13 +136,13 @@ export abstract class NexusModule {
     //  value will be loaded from the environment using the prefix `<MODULE_NAME>_` before
     //  the configuration key.  It is the responsibility of the user of Nexus to ensure that these
     //  appear in the environment properly.
-    public loadConfig(overrides?: NexusModuleConfig): NexusModuleConfig {
+    public loadConfig(overrides?: ModuleConfig): ModuleConfig {
         return overrides || {};
     }
 
     // allows the module to instantiate an express.Router object with preconfigured endpoints.  It can
     //  also protect those endpoints using the Nexus auth middleware.
-    public loadRoutes(_config: NexusModuleConfig): IRouteDefinition[] {
+    public loadRoutes(_config: ModuleConfig): IRouteDefinition[] {
         return [];
     }
 
@@ -130,7 +155,7 @@ export abstract class NexusModule {
 
     // most modules will use at least one connection.  This will allow the user to instantiate the connections
     //  and configure them using configuration that is specific to this module.
-    public loadConnections(_config: NexusModuleConfig, _router: Router): ConnectionRequestDefinition[] {
+    public loadConnections(_config: ModuleConfig, _subApp: Application): ConnectionRequest[] {
         return [];
     }
 

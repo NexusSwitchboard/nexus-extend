@@ -27,33 +27,36 @@ export abstract class Connection {
  */
 export type ConnectionFactory = (cfg: ConnectionConfig) => Connection;
 
+/**
+ * This is the configuration data associated with a connection and specified
+ * by the app client that is using Nexus.  It is uncommon for a connection
+ * to have a config specified here instead of a nexus module's config.
+ */
 export type ConnectionConfig = Record<string, any>;
-export type ConnectionRequestDefinition = {
+
+/**
+ * This is the definition of a connection as specified in the top level
+ * .nexus file.  Only connections specified here will be loadable by
+ * any modules.
+ */
+export interface INexusConnectionDefinition {
+    name: string;
+    scope?: string;
+    path?: string;
+    config?: ConnectionConfig;
+}
+
+/**
+ * A connection request is returned by a module indicating the connection
+ * that we want Nexus to instantiate along with the configuration options
+ * to use during that initialization.
+ */
+export type ConnectionRequest = {
     name: string,
     config: ConnectionConfig
 };
+
+/**
+ * Hash to quickly find connection objects based on a name.
+ */
 export type ConnectionMap = Record<string, Connection>;
-
-const moduleConnections: ConnectionMap = {};
-
-export const storeModuleConnection = (conn: Connection) => {
-    moduleConnections[conn.name] = conn;
-};
-
-export const findModuleConnection = (name: string | string[]): Connection => {
-
-    if (typeof name === "string") {
-        if (name in moduleConnections) {
-            return moduleConnections[name];
-        }
-    } else {
-        const availableNames = new Set(Object.keys(moduleConnections));
-        for (const elem of name) {
-            if (availableNames.has(elem)) {
-                return moduleConnections[elem];
-            }
-        }
-    }
-
-    return undefined;
-};
