@@ -35,16 +35,23 @@ export {
 } from "./helpers";
 
 
-export interface INexusDefinition {
-    rootUri: string;
+export type GlobalConfig = {
+    nexusPath: string,
+    baseUrl: string,
     authentication: {
         auth0: {
-            jwksUri: string;
-            audience: string;
-            issuer: string;
-            algorithms: string[];
+            jwksUri: string,
+            audience: string,
+            issuer: string,
+            algorithms: string[]
         }
-    };
+    }
+}
+
+export interface INexusDefinition {
+
+    global: GlobalConfig;
+
     connections: INexusConnectionDefinition[];
 
     modules: {

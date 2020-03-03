@@ -7,12 +7,16 @@
  * and disconnect.  You can use these however you wish but just know that connect is called on construction and
  * disconnect may not be called depending on how the connection is being used.
  */
+import { GlobalConfig } from "./index";
+
 export abstract class Connection {
     public name: string;
     public config: ConnectionConfig;
+    public globalConfig: GlobalConfig;
 
-    constructor(config: ConnectionConfig) {
+    constructor(config: ConnectionConfig, globalCfg?: GlobalConfig) {
         this.config = config;
+        this.globalConfig = globalCfg;
         this.connect();
     }
 
@@ -25,7 +29,7 @@ export abstract class Connection {
  * This is the Connection factor function that is exported by default from the main connection file.  This will
  * be called each time a module requests the creation of a new connection.
  */
-export type ConnectionFactory = (cfg: ConnectionConfig) => Connection;
+export type ConnectionFactory = (cfg: ConnectionConfig, globalCfg: GlobalConfig) => Connection;
 
 /**
  * This is the configuration data associated with a connection and specified

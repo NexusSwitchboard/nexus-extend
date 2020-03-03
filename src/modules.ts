@@ -2,6 +2,7 @@ import { Application, NextFunction, Request, Response } from "express";
 import { Connection, ConnectionMap, ConnectionRequest } from "./connections";
 import { Job, NexusJobDefinition } from "./jobs";
 import { NextHandleFunction } from "connect";
+import { GlobalConfig } from "./index";
 
 /**
  * Modules
@@ -87,12 +88,32 @@ export abstract class NexusModule {
     //  there could be issues with integrations such as routes.
     public abstract name: string;
 
+    // This is the uri path afte the nexus root that holds all downstream module
+    //  routes.
+    protected _moduleRootPath: string;
+
+    // This is the configuration data that is specified in the nexus definition file
+    //  and made available to all modules during initialization.
+    protected _globalConfig: GlobalConfig;
+
     // this stores the configuration and state of the module
     //  after the nexus core  has instantiated and launched it.
     protected activeModule: INexusActiveModule;
 
-    constructor() {
+    public constructor() {
         this.activeModule = null;
+    }
+
+    get globalConfig(): GlobalConfig {
+        return this._globalConfig;
+    }
+
+    set globalConfig(val: GlobalConfig) {
+        this._globalConfig = val;
+    }
+
+    get moduleRootPath(): string {
+        return `m/${this.name}`;
     }
 
     public setActiveModuleData(active: INexusActiveModule) {
