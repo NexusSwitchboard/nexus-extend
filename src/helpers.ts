@@ -2,6 +2,8 @@ import fs from "fs";
 import _ from "lodash";
 import path from "path";
 import * as handlebars from "handlebars";
+import { Application, Express } from "express";
+import listEndpoints from "express-list-endpoints";
 
 /**
  * Takes a key in the form of a dot-delimited string and iterates over the parts
@@ -109,3 +111,11 @@ export const loadTemplate = (filePath: string, data: Record<string, any>): strin
     const fileContent = fs.readFileSync(resolvedPath, "utf-8");
     return handlebars.compile(fileContent)(data);
 };
+
+/**
+ * For a given router, returns a list of route data
+ * @param app
+ */
+export function listRoutes(app: Application) {
+    return listEndpoints(app as Express);
+}

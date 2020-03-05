@@ -31,7 +31,8 @@ export {
     getNestedVal,
     hasOwnProperties,
     loadTemplate,
-    replaceAll
+    replaceAll,
+    listRoutes
 } from "./helpers";
 
 

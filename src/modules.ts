@@ -113,7 +113,7 @@ export abstract class NexusModule {
     }
 
     get moduleRootPath(): string {
-        return `m/${this.name}`;
+        return `/m/${this.name}`;
     }
 
     public setActiveModuleData(active: INexusActiveModule) {
