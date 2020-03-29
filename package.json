@@ -1,6 +1,6 @@
 {
   "name": "@nexus-switchboard/nexus-extend",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "Include this package when building nexus extensions.  It includes all the necessary types and base classes",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
