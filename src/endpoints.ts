@@ -66,6 +66,10 @@ const parseEndpoints = (app: any, basePath?: any, endpoints?: any) => {
     endpoints = endpoints || [];
     basePath = basePath || "";
 
+    if (!stack) {
+        return endpoints;
+    }
+
     stack.forEach((stackItem: any) => {
         if (stackItem.route) {
             const endpoint = parseExpressRoute(stackItem.route, basePath);
