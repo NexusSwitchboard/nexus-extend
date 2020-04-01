@@ -60,7 +60,7 @@ export interface INexusModuleDefinition {
  * _instances_, not just the definitions of each.
  */
 export interface INexusActiveModule {
-    config: INexusModuleDefinition;
+    config: ModuleConfig;
     subApp?: Application;
     jobs?: Job[];
     connections?: ConnectionMap;
@@ -114,10 +114,6 @@ export abstract class NexusModule {
 
     get moduleRootPath(): string {
         return `/m/${this.name}`;
-    }
-
-    public setActiveModuleData(active: INexusActiveModule) {
-        this.activeModule = active;
     }
 
     public getActiveModuleData() {
@@ -178,6 +174,16 @@ export abstract class NexusModule {
     //  and configure them using configuration that is specific to this module.
     public loadConnections(_config: ModuleConfig, _subApp: Application): ConnectionRequest[] {
         return [];
+    }
+
+    /**
+     * Called after the module has been fully loaded.  Gives the module a chance to initialize values, etc.  At this
+     * point, routes, jobs, connections and config have been successfully loaded and are given in the parameters.
+     * By default, this simply stores that information within the activeModule property.  Override to perform
+     * any other initializations you would like.
+     */
+    public async initialize(active: INexusActiveModule) {
+        this.activeModule = active;
     }
 
 }
