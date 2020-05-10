@@ -4,6 +4,8 @@ import path from "path";
 import * as handlebars from "handlebars";
 import { Application, Express } from "express";
 import {getEndpoints} from "./endpoints";
+import {IConfigGroupRule, ConfigType, IConfigGroups, ModuleConfig} from "./modules";
+import { Debugger } from 'debug';
 
 /**
  * Takes a key in the form of a dot-delimited string and iterates over the parts
@@ -118,4 +120,89 @@ export const loadTemplate = (filePath: string, data: Record<string, any>): strin
  */
 export function listRoutes(app: Application) {
     return getEndpoints(app as Express);
+}
+
+/**
+ * Runs through all the config rules and logs the validity of each outputting the reason for any errors that are
+ * found.  It then returns the number of errors found.  So if the return value is greater than zero then
+ * fatal errors were encountered
+ * @param config
+ */
+export function checkConfig(config: ModuleConfig, configRules: IConfigGroups, confLog: Debugger): number {
+
+    let errorCount = 0;
+
+    confLog("Starting Configuration Check...");
+    Object.keys(configRules).forEach((g: string) => {
+        const group: IConfigGroupRule[] = configRules[g];
+        confLog(`> Group: ${g}`);
+        group.forEach((r) => {
+
+            let pass = true;
+            const failed: [string, IConfigGroupRule][] = [];
+
+            // First check existence.
+            const val = config.hasOwnProperty(r.name) ? config[r.name] : undefined;
+            if (r.required && val === undefined) {
+                failed.push(["Not Found", r]);
+                pass = false;
+            } else if (val !== undefined) {
+
+                let tp = typeof (val) as ConfigType;
+                if (tp === "object") {
+                    if (val.hasOwnProperty("length")) {
+                        tp = "list";
+                    }
+                }
+
+                // Now check type
+                if (r.type && r.type.length > 0) {
+                    if (r.type.indexOf(tp) < 0) {
+                        failed.push(["Invalid Type", r])
+                        pass = false;
+                    }
+                }
+
+                // Now check regex
+                if (r.regex && tp === "string") {
+                    if (!r.regex.test(val)) {
+                        failed.push(["Invalid Format", r]);
+                        pass = false;
+                    }
+                }
+            }
+
+            if (pass) {
+                confLog(`   >> (o) ${r.name}`)
+            } else {
+                const errors = failed
+                    .filter((l: [string, IConfigGroupRule]) => {
+                        return l[1].level === "error"
+                    })
+                    .map((l: [string, IConfigGroupRule]) => {
+                        return l[0] + " - " + l[1].reason;
+                    });
+                const warnings = failed
+                    .filter((l: [string, IConfigGroupRule]) => {
+                        return l[1].level === "warning"
+                    })
+                    .map((l: [string, IConfigGroupRule]) => {
+                        return l[0] + " - " + l[1].reason;
+                    });
+
+                errors.forEach((e) => {
+                    confLog(`   >> (x) ${r.name} - ${e}`);
+                });
+
+                warnings.forEach((e) => {
+                    confLog(`   >> (!) ${r.name} - ${e}`);
+                });
+
+                errorCount += errors.length;
+
+            }
+        });
+    });
+
+    return errorCount;
 }

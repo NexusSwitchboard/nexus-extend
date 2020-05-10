@@ -78,6 +78,21 @@ export interface IRouteDefinition {
     bodyParser?: NextHandleFunction;
 }
 
+export type ConfigType = ("string" | "number" | "object" | "function" | "list");
+
+export interface IConfigGroupRule {
+    name: string,
+    required: boolean,
+    level: "error" | "warning",
+    reason: string,
+    default?: any,
+    type?: ConfigType[],
+    regex?: RegExp,
+    keys?: Record<string, string>
+}
+
+export type IConfigGroups = Record<string, IConfigGroupRule[]>;
+
 /**
  * Modules should derived from this class and instantiate an object of the type they create returning that
  * instance from their main index file.
@@ -148,30 +163,41 @@ export abstract class NexusModule {
         return this.activeModule.subApp;
     }
 
-    // allows the module to receive .nexus module config and return the results.  Note that
-    //  your configuration values can use the special "__env__" string to in which case the
-    //  value will be loaded from the environment using the prefix `<MODULE_NAME>_` before
-    //  the configuration key.  It is the responsibility of the user of Nexus to ensure that these
-    //  appear in the environment properly.
-    public loadConfig(overrides?: ModuleConfig): ModuleConfig {
-        return overrides || {};
+    /**
+     * Allows the module to receive .nexus module config and return the results.  Note that
+     * your configuration values can use the special "__env__" string to in which case the
+     * value will be loaded from the environment using the prefix `<MODULE_NAME>_` before
+     * the configuration key.  It is the responsibility of the user of Nexus to ensure that these
+     * appear in the environment properly.
+     * @param config 
+     */
+    public loadConfig(config?: ModuleConfig): ModuleConfig {
+        return config || {};
     }
-
-    // allows the module to instantiate an express.Router object with preconfigured endpoints.  It can
-    //  also protect those endpoints using the Nexus auth middleware.
+    /**
+     * Allows the module to instantiate an express.Router object with preconfigured endpoints.  It can
+     * also protect those endpoints using the Nexus auth middleware.
+     * @param _config
+     */
     public loadRoutes(_config: ModuleConfig): IRouteDefinition[] {
         return [];
     }
 
-    // the user will define job instance in the .nexus file.  Nexus will pass that configuration into
-    //  this loader.  Use the type to identify the right job class and instantiate it with the configuration
-    //  object given.  Return instances to the nexus core which will manage them from there.
+    /**
+    * The user will define job instance in the .nexus file.  Nexus will pass that configuration into
+    *  this loader.  Use the type to identify the right job class and instantiate it with the configuration
+    *  object given.  Return instances to the nexus core which will manage them from there.
+    * 
+    *  @param _jobsDefinition
+    */
     public loadJobs(_jobsDefinition: NexusJobDefinition[]): Job[] {
         return [];
     }
 
-    // most modules will use at least one connection.  This will allow the user to instantiate the connections
-    //  and configure them using configuration that is specific to this module.
+    /**
+    * Most modules will use at least one connection.  This will allow the user to instantiate the connections
+    *  and configure them using configuration that is specific to this module.
+    */
     public loadConnections(_config: ModuleConfig, _subApp: Application): ConnectionRequest[] {
         return [];
     }

@@ -22,7 +22,10 @@ export {
     ModuleConfig,
     IRouteDefinition,
     INexusActiveModule,
-    INexusModuleDefinition
+    INexusModuleDefinition,
+    IConfigGroupRule,
+    IConfigGroups,
+    ConfigType
 } from "./modules";
 
 export {
@@ -32,7 +35,8 @@ export {
     hasOwnProperties,
     loadTemplate,
     replaceAll,
-    listRoutes
+    listRoutes,
+    checkConfig
 } from "./helpers";
 
 
