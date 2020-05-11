@@ -2,7 +2,8 @@ import { Application, NextFunction, Request, Response } from "express";
 import { Connection, ConnectionMap, ConnectionRequest } from "./connections";
 import { Job, NexusJobDefinition } from "./jobs";
 import { NextHandleFunction } from "connect";
-import { GlobalConfig } from "./index";
+import {checkConfig, GlobalConfig} from "./index";
+import createDebug from "debug";
 
 /**
  * Modules
@@ -208,9 +209,36 @@ export abstract class NexusModule {
      * By default, this simply stores that information within the activeModule property.  Override to perform
      * any other initializations you would like.
      */
-    public async initialize(active: INexusActiveModule) {
+    public async initialize(active: INexusActiveModule): Promise<boolean> {
         this.activeModule = active;
+        const configRules = this.getConfigRules();
+
+        if (configRules) {
+            const errorCount = checkConfig(this.activeModule.config,
+                configRules, createDebug("nexus:service:config-check"));
+
+            return (errorCount === 0);
+        }
+
+        return true;
     }
 
+    /**
+     * This is called after all other setup has been done AND the config validation
+     * has been completed successfully.  Use this to do checks for things like valid
+     * credentials, database connections, etc.
+     * @param _active
+     */
+    public async validate(_active: INexusActiveModule): Promise<boolean> {
+        return true;
+    }
+
+    /**
+     * Override this if you want to have the initializer check that the configuration
+     * is valid in a very detailed way.
+     */
+    protected getConfigRules(): IConfigGroups {
+        return undefined;
+    }
 }
 
