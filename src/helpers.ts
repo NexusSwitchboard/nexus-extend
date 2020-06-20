@@ -25,7 +25,7 @@ export function getNestedVal(ob: Record<string, any>, key: string): any {
     let obSoFar = ob;
     let currentKey = parts.shift();
     while (currentKey !== undefined) {
-        if (obSoFar && currentKey in obSoFar) {
+        if (obSoFar && _.isPlainObject(obSoFar) && _.has(obSoFar, currentKey)) {
             obSoFar = obSoFar[currentKey];
             currentKey = parts.shift();
         } else {
