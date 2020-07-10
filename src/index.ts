@@ -36,7 +36,8 @@ export {
     loadTemplate,
     replaceAll,
     listRoutes,
-    checkConfig
+    checkConfig,
+    nestedAssign
 } from "./helpers";
 
 
